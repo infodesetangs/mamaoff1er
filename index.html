@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MamaOff1er - Le Hub Ultime (Temps Réel)</title>
+    <title>MamaOff1er</title>
     
     <script src="https://cdn.ably.com/lib/ably.min-1.js"></script>
     
@@ -11,7 +11,7 @@
     
     <style>
         /* * ----------------------------------------------------
-        * CSS : STYLE ÉNERGIQUE ET COLORÉ
+        * CSS : STYLE ÉNERGÉTIQUE ET COLORÉ
         * (Code CSS inchangé, conservé comme demandé)
         * ----------------------------------------------------
         */
@@ -23,8 +23,8 @@
             --color-yellow: #ffeb3b; /* Jaune Vif */
             
             /* Fond */
-            --background-dark: #121212; /* Fond très sombre */
-            --surface-dark: #1e1e1e;    /* Surface des cartes */
+            --background-dark: #121212;
+            --surface-dark: #1e1e1e;
             --text-light: #f9f9f9;
             
             --shadow-vibrant: 0 5px 15px rgba(255, 51, 161, 0.4);
@@ -34,7 +34,7 @@
         /* ------------------ GLOBAL ------------------ */
         body {
             font-family: var(--font-main);
-            background: linear-gradient(135deg, var(--background-dark) 0%, #2a003a 100%); /* Dégradé sombre et violet */
+            background: linear-gradient(135deg, var(--background-dark) 0%, #2a003a 100%);
             color: var(--text-light);
             margin: 0;
             padding: 0;
@@ -49,12 +49,12 @@
             width: 90%;
             max-width: 800px;
             padding: 40px;
-            background: rgba(30, 30, 30, 0.8); /* Surface principale semi-transparente */
+            background: rgba(30, 30, 30, 0.8);
             border-radius: 15px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
         }
 
-        /* ------------------ HEADER ------------------ */
+        /* ------------------ HEADER & CARTES ------------------ */
         header {
             text-align: center;
             margin-bottom: 50px;
@@ -63,7 +63,6 @@
         header h1 {
             font-size: 3.5em;
             font-weight: 900;
-            /* Texte en dégradé */
             background: linear-gradient(45deg, var(--color-pink), var(--color-cyan));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -77,13 +76,12 @@
             color: var(--color-yellow);
         }
 
-        /* ------------------ CARTES (CARDS) ------------------ */
         .card {
             background-color: var(--surface-dark);
             padding: 30px;
             margin-bottom: 25px;
             border-radius: 10px;
-            border-left: 5px solid var(--color-pink); /* Bordure accentuée */
+            border-left: 5px solid var(--color-pink);
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
             transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
@@ -102,8 +100,8 @@
             margin-top: 0;
             margin-bottom: 25px;
         }
-
-        /* ------------------ LIENS SOCIAUX (Hyper Vifs) ------------------ */
+        
+        /* Styles des liens (identiques à avant) */
         .social-links a {
             display: block;
             margin: 15px 0;
@@ -113,16 +111,9 @@
             font-weight: 700;
             font-size: 1.1em;
             text-align: center;
-            color: var(--background-dark); /* Texte sombre pour un contraste maximal */
+            color: var(--background-dark);
             transition: all 0.3s ease;
         }
-        
-        .social-links a:hover {
-            transform: scale(1.02);
-            box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
-        }
-
-        /* Personnalisation des dégradés pour chaque lien */
         .social-links a:nth-child(1) { /* Twitch */
             background: linear-gradient(90deg, #9146FF, var(--color-pink));
             color: white;
@@ -138,9 +129,8 @@
 
         /* ------------------ COMPTEUR ABLLY & BOUTON JS ------------------ */
         .data-panel {
-            /* Mise en page adaptée pour afficher le statut Ably au-dessus du bouton */
             display: flex;
-            flex-direction: column; /* Changé pour une meilleure mise en page */
+            flex-direction: column;
             align-items: center;
             padding: 20px 0 10px 0;
             margin-top: 10px;
@@ -148,21 +138,19 @@
         }
         
         .counter-display {
-            text-align: center; /* Centré pour une meilleure lecture du compteur */
-            color: var(--text-light);
-            line-height: 1.2;
-            margin-bottom: 20px; /* Ajout d'espace */
+            text-align: center;
+            margin-bottom: 20px;
         }
         
         #interaction-count {
-            font-size: 3.5em; /* Agrandissement pour l'effet temps réel */
+            font-size: 3.5em;
             font-weight: 900;
             color: var(--color-yellow);
-            text-shadow: 0 0 15px rgba(255, 235, 59, 0.7);
+            text-shadow: 0 0 20px rgba(255, 235, 59, 0.7);
             transition: color 0.3s, transform 0.3s;
         }
         
-        #ably-status { /* Style pour le statut de connexion */
+        #ably-status {
             display: block;
             margin-top: 5px;
             font-size: 0.9em;
@@ -176,12 +164,11 @@
             cursor: pointer;
             border: none;
             border-radius: 50px;
-            
             background: var(--color-pink);
             color: white;
             box-shadow: 0 0 20px var(--color-pink);
             transition: all 0.2s ease-in-out;
-            width: 100%; /* Rendu pleine largeur pour le style */
+            width: 100%;
             max-width: 400px;
         }
         
@@ -210,13 +197,13 @@
 
         <div class="card">
             <h2>Statut & Interactions</h2>
-            <p>Ce compteur est mis à jour en **temps réel** pour tous les visiteurs du site !</p>
+            <p>Ce compteur est **persistant** et mis à jour en **temps réel** pour tous les visiteurs du site !</p>
             
             <div class="data-panel">
                 <div class="counter-display">
                     Interactions Globales :
-                    <div id="interaction-count">0</div>
-                    <small id="ably-status">Connexion à Ably...</small>
+                    <div id="interaction-count">...</div>
+                    <small id="ably-status">Connexion à Ably en cours...</small>
                 </div>
 
                 <button id="interactive-button" onclick="incrementCounter()">
@@ -232,39 +219,22 @@
     </div>
 
     <script>
-        // ⚠️ REMPLACE 'VOTRE_CLE_ABLY_ICI' PAR TA CLÉ ABBLY VÉRITABLE ! ⚠️
-        const ABLY_API_KEY = 'LJbA1A.bse1tg:y07QVWZXFq9nmwxHk6pGDXGmSilgPlG3r_9lHeEa2Ys'; 
+        // ⚠️ REMPLACE 'LJbA1A.bse1tg:y07QVWZXFq9nmwxHk6pGDXGmSilgPlG3r_9lHeEa2Ys' PAR TA CLÉ ABBLY VÉRITABLE ! ⚠️
+        const ABLY_API_KEY = 'VOTRE_CLE_ABLY_ICI'; 
         const CHANNEL_NAME = 'mamaoff1er-interactions';
         const COUNT_MESSAGE = 'count-update';
         
         const counterElement = document.getElementById('interaction-count');
         const statusElement = document.getElementById('ably-status');
         const button = document.getElementById('interactive-button');
-        let currentCount = 0; // Valeur du compteur actuelle
+        let currentCount = 0;
 
         // Initialisation d'Ably
         const ably = new Ably.Realtime({ key: ABLY_API_KEY });
         const channel = ably.channels.get(CHANNEL_NAME);
 
-        // Gestion de l'état de la connexion
-        ably.connection.on('connected', () => {
-            console.log('Connecté à Ably !');
-            statusElement.textContent = "Connecté : Compteur en temps réel actif.";
-            statusElement.style.color = 'var(--color-cyan)';
-            // Note: Pour initialiser le compteur à une valeur persistante (ex: 100), 
-            // il faudrait stocker la valeur totale dans une base de données et la charger au départ.
-        });
-        
-        ably.connection.on('failed', (error) => {
-            console.error('Échec de la connexion Ably:', error);
-            statusElement.textContent = "Échec de connexion Ably. Vérifie ta clé !";
-            statusElement.style.color = '#FF0000';
-        });
-
-        // 2. SOUSCRIPTION (Abonnement) : Met à jour le compteur quand un message est reçu
-        channel.subscribe(COUNT_MESSAGE, (message) => {
-            const newCount = message.data.count;
-            
+        // --- FONCTION DE MISE À JOUR (REÇU) ---
+        function updateCounter(newCount) {
             // Met à jour la valeur locale et le DOM
             counterElement.textContent = newCount;
             currentCount = newCount;
@@ -274,8 +244,51 @@
             setTimeout(() => {
                 counterElement.style.transform = 'scale(1.0)';
             }, 100);
+        }
+
+        // --- 1. RÉCUPÉRATION DE L'HISTORIQUE (PERSISTANCE) ---
+        function loadInitialCount() {
+            channel.history((err, resultPage) => {
+                if (err) {
+                    console.error('Erreur lors du chargement de l\'historique Ably:', err);
+                    counterElement.textContent = '0'; // Valeur par défaut en cas d'erreur
+                    return;
+                }
+                
+                // Cherche le dernier message 'count-update' dans l'historique
+                const latestMessage = resultPage.items.find(msg => msg.name === COUNT_MESSAGE);
+                
+                if (latestMessage) {
+                    updateCounter(latestMessage.data.count);
+                    console.log(`Compteur initialisé avec l'historique: ${latestMessage.data.count}`);
+                } else {
+                    counterElement.textContent = '0';
+                    console.log('Aucune donnée d\'historique trouvée, compteur initialisé à 0.');
+                }
+            });
+        }
+
+        // --- GESTION DE LA CONNEXION ---
+        ably.connection.on('connected', () => {
+            console.log('Connecté à Ably !');
+            statusElement.textContent = "Connecté : Compteur en temps réel et persistant actif.";
+            statusElement.style.color = 'var(--color-cyan)';
             
-            console.log(`Compteur mis à jour : ${newCount}`);
+            // Charge la dernière valeur immédiatement après la connexion
+            loadInitialCount();
+        });
+        
+        ably.connection.on('failed', (error) => {
+            console.error('Échec de la connexion Ably:', error);
+            statusElement.textContent = "Échec de connexion Ably. Vérifie ta clé !";
+            statusElement.style.color = '#FF0000';
+            counterElement.textContent = 'Erreur!';
+        });
+
+        // 2. SOUSCRIPTION (Abonnement) : Met à jour le compteur quand un message est reçu
+        channel.subscribe(COUNT_MESSAGE, (message) => {
+            // Le message reçu met à jour l'état de tous les clients
+            updateCounter(message.data.count);
         });
 
         // 3. PUBLICATION : Incrémente le compteur et envoie le message via Ably
@@ -285,7 +298,6 @@
                 return;
             }
             
-            // Incrémente la valeur pour le prochain message
             const nextCount = currentCount + 1;
             
             // Publie le nouveau compteur à tous les abonnés

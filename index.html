@@ -12,7 +12,6 @@
     <style>
         /* * ----------------------------------------------------
         * CSS : STYLE ÉNERGÉTIQUE ET COLORÉ
-        * (Code CSS inchangé, conservé comme demandé)
         * ----------------------------------------------------
         */
 
@@ -219,20 +218,19 @@
     </div>
 
     <script>
-        // ⚠️ REMPLACE 'b-Eojg.uxqCCA:-rA7CEJ9ED_aFZgN9Uzt247zfSbCWVBGjA7boA3VAFw' PAR TA CLÉ ABBLY VÉRITABLE ! ⚠️
-        const ABLY_API_KEY = 'VOTRE_CLE_ABLY_ICI'; 
+        // 🔑 CLÉ ABLLY INTÉGRÉE :
+        const ABLY_API_KEY = 'b-Eojg.uxqCCA:-rA7CEJ9ED_aFZgN9Uzt247zfSbCWVBGjA7boA3VAFw'; 
         const CHANNEL_NAME = 'mamaoff1er-interactions';
         const COUNT_MESSAGE = 'count-update';
-        const LOCAL_STORAGE_KEY = 'mamaoff1er_global_count'; // Clé pour LocalStorage
+        const LOCAL_STORAGE_KEY = 'mamaoff1er_global_count'; 
         
         const counterElement = document.getElementById('interaction-count');
         const statusElement = document.getElementById('ably-status');
         const button = document.getElementById('interactive-button');
-        let currentCount = 0; // Valeur du compteur actuelle
+        let currentCount = 0; 
         
         // --- 1. INITIALISATION DE LA VALEUR PERSISTANTE (LocalStorage) ---
         function loadInitialCount() {
-            // Tente de récupérer la dernière valeur sauvegardée localement
             const storedCount = localStorage.getItem(LOCAL_STORAGE_KEY);
             if (storedCount !== null && !isNaN(parseInt(storedCount))) {
                 currentCount = parseInt(storedCount);
@@ -253,7 +251,7 @@
             currentCount = newCount;
             counterElement.textContent = newCount;
             
-            // Sauvegarde la nouvelle valeur dans LocalStorage (pour la persistance au rechargement)
+            // Sauvegarde la nouvelle valeur dans LocalStorage 
             localStorage.setItem(LOCAL_STORAGE_KEY, newCount);
             
             // Effet visuel rapide sur le compteur
@@ -269,9 +267,8 @@
             statusElement.textContent = "Connecté : Compteur en temps réel actif.";
             statusElement.style.color = 'var(--color-cyan)';
             
-            // Lors de la connexion, on demande une mise à jour immédiate
-            // pour synchroniser le compteur LocalStorage avec le compteur global.
-            // On publie la valeur LocalStorage pour forcer l'alignement de tous.
+            // Lors de la connexion, on publie la valeur LocalStorage pour 
+            // synchroniser le compteur de ce client avec le compteur global.
             channel.publish(COUNT_MESSAGE, { count: currentCount });
         });
         
@@ -289,18 +286,17 @@
 
         // 4. PUBLICATION : Incrémente le compteur et envoie le message via Ably
         function incrementCounter() {
-            // Si Ably n'est pas connecté, l'incrément fonctionne en LocalStorage uniquement
-            if (ably.connection.state !== 'connected') {
-                updateCounter(currentCount + 1); // Incrément local
-                statusElement.textContent = "Non connecté à Ably (Mode LocalStorage)";
-                statusElement.style.color = '#FF0000';
-                return;
-            }
-            
             const nextCount = currentCount + 1;
+
+            // 1. Mise à jour de LocalStorage et du DOM (immédiatement pour le client)
+            updateCounter(nextCount);
             
-            // Publie le nouveau compteur à tous les abonnés
-            channel.publish(COUNT_MESSAGE, { count: nextCount });
+            // 2. Publication sur Ably (pour les autres clients)
+            if (ably.connection.state === 'connected') {
+                channel.publish(COUNT_MESSAGE, { count: nextCount });
+            } else {
+                 statusElement.textContent = "Non connecté à Ably (Mode LocalStorage)";
+            }
             
             // Effet visuel du bouton
             button.style.backgroundColor = 'var(--color-cyan)';
@@ -313,7 +309,7 @@
                 button.style.boxShadow = '0 0 20px var(--color-pink)';
             }, 150);
             
-            button.textContent = `PUBLICATION DU CLIC N°${nextCount} !`;
+            button.textContent = `CLIC GLOBAL N°${nextCount} !`;
         }
         
         // Exécuter l'initialisation au chargement de la page

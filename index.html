@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MamaOff1er</title>
+    <title>MamaOff1er - Le Hub Ultime (Temps Réel et Robuste)</title>
     
     <script src="https://cdn.ably.com/lib/ably.min-1.js"></script>
     
@@ -197,13 +197,13 @@
 
         <div class="card">
             <h2>Statut & Interactions</h2>
-            <p>Ce compteur est **persistant** et mis à jour en **temps réel** pour tous les visiteurs du site !</p>
+            <p>Ce compteur est mis à jour en **temps réel** pour tous et persiste au rechargement !</p>
             
             <div class="data-panel">
                 <div class="counter-display">
                     Interactions Globales :
                     <div id="interaction-count">...</div>
-                    <small id="ably-status">Connexion à Ably en cours...</small>
+                    <small id="ably-status">Connexion à Ably...</small>
                 </div>
 
                 <button id="interactive-button" onclick="incrementCounter()">
@@ -223,21 +223,38 @@
         const ABLY_API_KEY = 'VOTRE_CLE_ABLY_ICI'; 
         const CHANNEL_NAME = 'mamaoff1er-interactions';
         const COUNT_MESSAGE = 'count-update';
+        const LOCAL_STORAGE_KEY = 'mamaoff1er_global_count'; // Clé pour LocalStorage
         
         const counterElement = document.getElementById('interaction-count');
         const statusElement = document.getElementById('ably-status');
         const button = document.getElementById('interactive-button');
-        let currentCount = 0;
+        let currentCount = 0; // Valeur du compteur actuelle
+        
+        // --- 1. INITIALISATION DE LA VALEUR PERSISTANTE (LocalStorage) ---
+        function loadInitialCount() {
+            // Tente de récupérer la dernière valeur sauvegardée localement
+            const storedCount = localStorage.getItem(LOCAL_STORAGE_KEY);
+            if (storedCount !== null && !isNaN(parseInt(storedCount))) {
+                currentCount = parseInt(storedCount);
+            } else {
+                currentCount = 0;
+            }
+            counterElement.textContent = currentCount;
+            console.log(`Compteur initialisé via LocalStorage à: ${currentCount}`);
+        }
 
-        // Initialisation d'Ably
+        // --- 2. INITIALISATION D'ABLY ---
         const ably = new Ably.Realtime({ key: ABLY_API_KEY });
         const channel = ably.channels.get(CHANNEL_NAME);
 
         // --- FONCTION DE MISE À JOUR (REÇU) ---
         function updateCounter(newCount) {
             // Met à jour la valeur locale et le DOM
-            counterElement.textContent = newCount;
             currentCount = newCount;
+            counterElement.textContent = newCount;
+            
+            // Sauvegarde la nouvelle valeur dans LocalStorage (pour la persistance au rechargement)
+            localStorage.setItem(LOCAL_STORAGE_KEY, newCount);
             
             // Effet visuel rapide sur le compteur
             counterElement.style.transform = 'scale(1.1)';
@@ -246,55 +263,37 @@
             }, 100);
         }
 
-        // --- 1. RÉCUPÉRATION DE L'HISTORIQUE (PERSISTANCE) ---
-        function loadInitialCount() {
-            channel.history((err, resultPage) => {
-                if (err) {
-                    console.error('Erreur lors du chargement de l\'historique Ably:', err);
-                    counterElement.textContent = '0'; // Valeur par défaut en cas d'erreur
-                    return;
-                }
-                
-                // Cherche le dernier message 'count-update' dans l'historique
-                const latestMessage = resultPage.items.find(msg => msg.name === COUNT_MESSAGE);
-                
-                if (latestMessage) {
-                    updateCounter(latestMessage.data.count);
-                    console.log(`Compteur initialisé avec l'historique: ${latestMessage.data.count}`);
-                } else {
-                    counterElement.textContent = '0';
-                    console.log('Aucune donnée d\'historique trouvée, compteur initialisé à 0.');
-                }
-            });
-        }
-
         // --- GESTION DE LA CONNEXION ---
         ably.connection.on('connected', () => {
             console.log('Connecté à Ably !');
-            statusElement.textContent = "Connecté : Compteur en temps réel et persistant actif.";
+            statusElement.textContent = "Connecté : Compteur en temps réel actif.";
             statusElement.style.color = 'var(--color-cyan)';
             
-            // Charge la dernière valeur immédiatement après la connexion
-            loadInitialCount();
+            // Lors de la connexion, on demande une mise à jour immédiate
+            // pour synchroniser le compteur LocalStorage avec le compteur global.
+            // On publie la valeur LocalStorage pour forcer l'alignement de tous.
+            channel.publish(COUNT_MESSAGE, { count: currentCount });
         });
         
         ably.connection.on('failed', (error) => {
             console.error('Échec de la connexion Ably:', error);
-            statusElement.textContent = "Échec de connexion Ably. Vérifie ta clé !";
+            statusElement.textContent = "Échec de connexion Ably. Compteur en mode LocalStorage seulement.";
             statusElement.style.color = '#FF0000';
-            counterElement.textContent = 'Erreur!';
         });
 
-        // 2. SOUSCRIPTION (Abonnement) : Met à jour le compteur quand un message est reçu
+        // 3. SOUSCRIPTION (Abonnement) : Met à jour le compteur quand un message est reçu
         channel.subscribe(COUNT_MESSAGE, (message) => {
             // Le message reçu met à jour l'état de tous les clients
             updateCounter(message.data.count);
         });
 
-        // 3. PUBLICATION : Incrémente le compteur et envoie le message via Ably
+        // 4. PUBLICATION : Incrémente le compteur et envoie le message via Ably
         function incrementCounter() {
+            // Si Ably n'est pas connecté, l'incrément fonctionne en LocalStorage uniquement
             if (ably.connection.state !== 'connected') {
-                alert("Erreur: Non connecté à Ably. Vérifiez la clé API.");
+                updateCounter(currentCount + 1); // Incrément local
+                statusElement.textContent = "Non connecté à Ably (Mode LocalStorage)";
+                statusElement.style.color = '#FF0000';
                 return;
             }
             
@@ -316,6 +315,9 @@
             
             button.textContent = `PUBLICATION DU CLIC N°${nextCount} !`;
         }
+        
+        // Exécuter l'initialisation au chargement de la page
+        loadInitialCount();
     </script>
 
 </body>
